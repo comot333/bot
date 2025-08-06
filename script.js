@@ -22,28 +22,20 @@ async function sendMessage() {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: message }] }]
-        })
-      }
-    );
-
-    const data = await res.json();
-    document.querySelector(".ai:last-child").remove();
-
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI tidak merespons.";
-    addMessage(reply, "ai");
-  } catch (err) {
-    document.querySelector(".ai:last-child").remove();
-    addMessage("Terjadi kesalahan.", "ai");
+  `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: message }] }]
+    })
   }
-}
+);
 
-sendBtn.addEventListener("click", sendMessage);
-userInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
-});
+const data = await res.json();
+console.log(data); // Debug di console
+
+document.querySelector(".ai:last-child").remove();
+
+const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI tidak merespons.";
+addMessage(reply, "ai");
