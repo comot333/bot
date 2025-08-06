@@ -1,4 +1,4 @@
-const apiKey = "AIzaSyAloC5dLQG5wLrm1xO0BRLb-5O1zIX7pQc"; // Masukkan API key Gemini
+const apiKey = "sk-9673ed4d355d4ca9bf0204d4ea5efca4";
 const chatBox = document.getElementById("chatBox");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -17,25 +17,35 @@ async function sendMessage() {
 
   addMessage(message, "user");
   userInput.value = "";
-
   addMessage("Mengetik...", "ai");
 
   try {
-    const res = await fetch(
-  `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: message }] }]
-    })
+    const res = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat", // model utama DeepSeek
+        messages: [{ role: "user", content: message }]
+      })
+    });
+
+    const data = await res.json();
+    console.log(data);
+    document.querySelector(".ai:last-child").remove();
+
+    const reply = data.choices?.[0]?.message?.content || "Maaf, AI tidak merespons.";
+    addMessage(reply, "ai");
+  } catch (err) {
+    console.error(err);
+    document.querySelector(".ai:last-child").remove();
+    addMessage("Terjadi kesalahan.", "ai");
   }
-);
+}
 
-const data = await res.json();
-console.log(data); // Debug di console
-
-document.querySelector(".ai:last-child").remove();
-
-const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI tidak merespons.";
-addMessage(reply, "ai");
+sendBtn.addEventListener("click", sendMessage);
+userInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") sendMessage();
+});
